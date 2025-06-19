@@ -3,6 +3,9 @@
 [:star: Docker Hub](https://hub.docker.com/r/peterrus/s3-cron-backup/)
 [:star: Github](https://github.com/peterrus/docker-s3-cron-backup)
 
+> [!NOTE]  
+> This is a fork. The instructions will tell you to pull the Docker Hub image. To get the changes from this fork you'll need to clone the repo and build the image locally.
+
 ## What is it?
 A modest little container image that periodically backups any volume mounted to `/data` to S3-compatible storage in the form of a timestamped, gzipped, tarball. By default this container is configured to work with Amazon S3 but it should work with most S3-backends.
 
