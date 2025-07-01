@@ -4,6 +4,15 @@ set -e
 
 source /home/backup/.env
 
+# if dry run is mode is enabled, no upload to AWS will be performed
+DRY_RUN=${DRY_RUN:-false}
+# does everything dry run and in addition no creation of archive
+DRY_RUN_WITHOUT_ARCHIVE=${DRY_RUN_WITHOUT_ARCHIVE:-false}
+
+if [ "$DRY_RUN_WITHOUT_ARCHIVE = true" ] || [ "$DRY_RUN" = true ]; then
+    echo "Dry run mode is enabled. No backup will be performed."
+fi
+
 # default storage class to standard if not provided
 S3_STORAGE_CLASS=${S3_STORAGE_CLASS:-STANDARD}
 
@@ -25,9 +34,23 @@ else
 fi
 
 echo "creating archive"
-tar -zcvf "${FILE_NAME}" "${TARGET}"
+
+if [ "$DRY_RUN_WITHOUT_ARCHIVE" = true ]; then
+    echo "Dry run without archive mode is enabled. No archive will be created."
+    # Creates an empty file to simulate the archive creation and later deletion
+    touch "$FILE_NAME"
+else
+    tar -zcvf "${FILE_NAME}" "${TARGET}"
+fi
+
 echo "uploading archive to S3 [${FILE_NAME}, storage class - ${S3_STORAGE_CLASS}]"
-aws s3 ${AWS_ARGS} cp --storage-class "${S3_STORAGE_CLASS}" "${FILE_NAME}" "${S3_BUCKET_URL}"
+
+if [ "$DRY_RUN_WITHOUT_ARCHIVE = true" ] || [ "$DRY_RUN" = true ]; then
+    echo "Dry run mode is enabled. No upload to AWS will be performed."
+else
+    aws s3 ${AWS_ARGS} cp --storage-class "${S3_STORAGE_CLASS}" "${FILE_NAME}" "${S3_BUCKET_URL}"
+fi
+
 echo "removing local archive"
 rm "${FILE_NAME}"
 echo "done"
