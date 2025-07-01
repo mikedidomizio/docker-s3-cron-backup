@@ -92,6 +92,18 @@ Run the following command to trigger a backup manually on a running container:
 docker exec -u backup -it ${CONTAINER_ID} sh dobackup.sh
 ```
 
+### Trigger dry run manually (no AWS upload)
+
+```
+docker exec -u backup -e DRY_RUN=true -it ${CONTAINER_ID} sh dobackup.sh
+```
+
+### Trigger dry run without upload and without compression
+
+```
+docker exec -u backup -e DRY_RUN_WITHOUT_ARCHIVE=true -it ${CONTAINER_ID} sh dobackup.sh
+```
+
 ## It doesn't do X or Y!
 
 Let this container serve as a starting point and an inspiration! Feel free to modify it and even open a PR if you feel others can benefit from these changes.
