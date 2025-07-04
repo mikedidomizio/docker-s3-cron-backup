@@ -45,7 +45,7 @@ fi
 
 echo "uploading archive to S3 [${FILE_NAME}, storage class - ${S3_STORAGE_CLASS}]"
 
-if [ "$DRY_RUN_WITHOUT_ARCHIVE = true" ] || [ "$DRY_RUN" = true ]; then
+if [ "$DRY_RUN_WITHOUT_ARCHIVE" = true ] || [ "$DRY_RUN" = true ]; then
     echo "Dry run mode is enabled. No upload to AWS will be performed."
 else
     aws s3 ${AWS_ARGS} cp --storage-class "${S3_STORAGE_CLASS}" "${FILE_NAME}" "${S3_BUCKET_URL}"
