@@ -9,7 +9,7 @@ DRY_RUN=${DRY_RUN:-false}
 # does everything dry run and in addition no creation of archive
 DRY_RUN_WITHOUT_ARCHIVE=${DRY_RUN_WITHOUT_ARCHIVE:-false}
 
-if [ "$DRY_RUN_WITHOUT_ARCHIVE = true" ] || [ "$DRY_RUN" = true ]; then
+if [ "$DRY_RUN_WITHOUT_ARCHIVE" = true ] || [ "$DRY_RUN" = true ]; then
     echo "Dry run mode is enabled. No backup will be performed."
 fi
 
