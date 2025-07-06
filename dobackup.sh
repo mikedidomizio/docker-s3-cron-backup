@@ -2,7 +2,7 @@
 
 set -e
 
-source /home/backup/.env
+. /home/backup/.env
 
 # if dry run is mode is enabled, no upload to AWS will be performed
 DRY_RUN=${DRY_RUN:-false}
@@ -43,12 +43,21 @@ else
     tar -zcvf "${FILE_NAME}" "${TARGET}"
 fi
 
-echo "uploading archive to S3 [${FILE_NAME}, storage class - ${S3_STORAGE_CLASS}]"
+# if today is the first day of the month, we set retention tag to monthly
+# otherwise, we set it to daily
+DAY_OF_MONTH=$(date +%d)
+if [ "$DAY_OF_MONTH" = "01" ]; then
+    RETENTION_TAG="monthly"
+else
+    RETENTION_TAG="daily"
+fi
+
+echo "uploading archive to S3 [${FILE_NAME}, storage class - ${S3_STORAGE_CLASS}, retention tag - ${RETENTION_TAG}]"
 
 if [ "$DRY_RUN_WITHOUT_ARCHIVE" = true ] || [ "$DRY_RUN" = true ]; then
     echo "Dry run mode is enabled. No upload to AWS will be performed."
 else
-    aws s3 ${AWS_ARGS} cp --storage-class "${S3_STORAGE_CLASS}" "${FILE_NAME}" "${S3_BUCKET_URL}"
+    aws s3 "${AWS_ARGS}" cp --storage-class "${S3_STORAGE_CLASS}" "${FILE_NAME}" "${S3_BUCKET_URL}" --tagging "Retention=$RETENTION_TAG"
 fi
 
 echo "removing local archive"
