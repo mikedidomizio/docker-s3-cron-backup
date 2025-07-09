@@ -17,7 +17,10 @@ fi
 S3_STORAGE_CLASS=${S3_STORAGE_CLASS:-STANDARD}
 
 # generate file name for tar
-FILE_NAME=/tmp/${BACKUP_NAME}-$(date "+%Y-%m-%d_%H-%M-%S").tar.gz
+FILE_NAME=${BACKUP_NAME}-$(date "+%Y-%m-%d_%H-%M-%S").tar.gz
+
+# full absolute path
+FILE_PATH=/tmp/${FILE_NAME}
 
 # Check if TARGET variable is set
 if [ -z "${TARGET}" ]; then
@@ -38,9 +41,9 @@ echo "creating archive"
 if [ "$DRY_RUN_WITHOUT_ARCHIVE" = true ]; then
     echo "Dry run without archive mode is enabled. No archive will be created."
     # Creates an empty file to simulate the archive creation and later deletion
-    touch "$FILE_NAME"
+    touch "$FILE_PATH"
 else
-    tar -zcvf "${FILE_NAME}" "${TARGET}"
+    tar -zcvf "${FILE_PATH}" "${TARGET}"
 fi
 
 # if today is the first day of the month, we set retention tag to monthly
@@ -52,16 +55,16 @@ else
     RETENTION_TAG="daily"
 fi
 
-echo "uploading archive to S3 [${FILE_NAME}, storage class - ${S3_STORAGE_CLASS}, retention tag - ${RETENTION_TAG}]"
+echo "uploading archive to S3 [${FILE_PATH}, storage class - ${S3_STORAGE_CLASS}, retention tag - ${RETENTION_TAG}]"
 
 if [ "$DRY_RUN_WITHOUT_ARCHIVE" = true ] || [ "$DRY_RUN" = true ]; then
     echo "Dry run mode is enabled. No upload to AWS will be performed."
 else
-    aws s3 ${AWS_ARGS} cp --storage-class "${S3_STORAGE_CLASS}" "${FILE_NAME}" "${S3_BUCKET_URL}"
+    aws s3 ${AWS_ARGS} cp --storage-class "${S3_STORAGE_CLASS}" "${FILE_PATH}" "${S3_BUCKET_URL}"
 fi
 
 echo "removing local archive"
-rm "${FILE_NAME}"
+rm "${FILE_PATH}"
 
 echo "waiting to add retention tag to the archive (make sure the upload is complete and available)"
 sleep 1m
